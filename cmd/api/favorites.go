@@ -29,7 +29,7 @@ func (app *application) flagFavoriteRecipe(w http.ResponseWriter, r *http.Reques
 	// get user id
 	uid, err := strconv.ParseInt(params.ByName("uid"), 10, 64)
 	if err != nil {
-		http.NotFound(w, r)
+		app.notFoundResponse(w, r)
 		return
 	}
 
@@ -43,14 +43,14 @@ func (app *application) unflagFavoriteRecipe(w http.ResponseWriter, r *http.Requ
 	// get user id
 	uid, err := strconv.ParseInt(params.ByName("uid"), 10, 64)
 	if err != nil {
-		http.NotFound(w, r)
+		app.notFoundResponse(w, r)
 		return
 	}
 
 	// get recipe id
 	rid, err := strconv.ParseInt(params.ByName("rid"), 10, 64)
 	if err != nil {
-		http.NotFound(w, r)
+		app.notFoundResponse(w, r)
 		return
 	}
 

@@ -10,6 +10,10 @@ import (
 func (app *application) routes() *httprouter.Router {
 	router := httprouter.New()
 
+	// custom notfound and method-not-allowed handler
+	router.NotFound = http.HandlerFunc(app.notFoundResponse)
+	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
+
 	// root route
 	router.HandlerFunc(http.MethodGet, "/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Welcome to Welsh Academy.")

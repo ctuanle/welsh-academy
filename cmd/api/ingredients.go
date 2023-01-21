@@ -48,7 +48,7 @@ func (app *application) createIngredient(w http.ResponseWriter, r *http.Request)
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
 		// bad request
-		app.writeJson(w, r, http.StatusBadRequest, envelope{"error": err.Error()}, nil)
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -62,6 +62,6 @@ func (app *application) createIngredient(w http.ResponseWriter, r *http.Request)
 	err = app.writeJson(w, r, http.StatusCreated, nil, nil)
 	if err != nil {
 		app.logger.Print(err)
-		http.Error(w, "Server Error", http.StatusInternalServerError)
+		app.serverErrorResponse(w, r, err)
 	}
 }
