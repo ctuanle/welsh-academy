@@ -54,3 +54,16 @@ func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request)
 func (app *application) methodNotAllowedResponse(w http.ResponseWriter, r *http.Request) {
 	app.errorResponse(w, r, http.StatusMethodNotAllowed, fmt.Sprintf("%s method is not support for this resource", r.Method))
 }
+
+// readBodyToJSON decode request body into dst
+func (app *application) readBodyToJSON(w http.ResponseWriter, r *http.Request, dst any) error {
+	maxBytes := 1_048_576 // 2^20
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields() // return error if there is unknown field
+
+	err := decoder.Decode(dst)
+
+	return err
+}

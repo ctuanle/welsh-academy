@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
 )
 
@@ -24,7 +23,7 @@ func (app *application) createIngredient(w http.ResponseWriter, r *http.Request)
 	}
 
 	// decode body content into input
-	err := json.NewDecoder(r.Body).Decode(&input)
+	err := app.readBodyToJSON(w, r, &input)
 	if err != nil {
 		// bad request
 		app.errorResponse(w, r, http.StatusBadRequest, err.Error())

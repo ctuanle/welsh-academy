@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -41,7 +40,7 @@ func (app *application) flagFavoriteRecipe(w http.ResponseWriter, r *http.Reques
 		RecipeId int `json:"recipe_id"`
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&input)
+	err = app.readBodyToJSON(w, r, &input)
 	if err != nil {
 		// bad request
 		app.errorResponse(w, r, http.StatusBadRequest, err.Error())

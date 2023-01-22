@@ -1,16 +1,55 @@
 package main
 
 import (
-	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"ctuanle.ovh/welsh-academy/internal/models"
 )
 
 // listRecipes list all existing recipes
 // both expert and user can access this
+// support including/excluding ingredient(s)
 func (app *application) listRecipes(w http.ResponseWriter, r *http.Request) {
-	recipes, _ := app.recipes.GetAll()
+	query := r.URL.Query()
+	include := strings.Split(query.Get("include"), ",")
+	exclude := strings.Split(query.Get("exclude"), ",")
+
+	includeMap := make(map[int]struct{})
+	excludeMap := make(map[int]struct{})
+
+	for _, rid := range include {
+		if rid != "" {
+			_rid, err := strconv.Atoi(rid)
+			if err != nil || _rid < 1 {
+				app.errorResponse(w, r, http.StatusBadRequest, "Invalid Ingredient ID (include)")
+				return
+			}
+			includeMap[_rid] = struct{}{}
+		}
+	}
+
+	for _, rid := range exclude {
+		if rid != "" {
+			_rid, err := strconv.Atoi(rid)
+			if err != nil || _rid < 1 {
+				app.errorResponse(w, r, http.StatusBadRequest, "Invalid Ingredient ID (exclude)")
+				return
+			}
+
+			if _, ok := includeMap[_rid]; ok {
+				app.errorResponse(w, r, http.StatusBadRequest, fmt.Sprintf("Cannot include and exclude ingredient with ID %d", _rid))
+				return
+			}
+
+			excludeMap[_rid] = struct{}{}
+		}
+
+	}
+
+	recipes, _ := app.recipes.GetAll(includeMap, excludeMap)
 	err := app.writeJson(w, r, http.StatusOK, envelope{"recipes": recipes}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -28,7 +67,7 @@ func (app *application) createRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// decode body content into input
-	err := json.NewDecoder(r.Body).Decode(&input)
+	err := app.readBodyToJSON(w, r, &input)
 	if err != nil {
 		// bad request
 		app.errorResponse(w, r, http.StatusBadRequest, err.Error())

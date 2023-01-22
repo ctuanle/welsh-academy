@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type RecipeIngredient struct {
 	ID     int     `json:"id"`
@@ -46,11 +48,69 @@ var Recipes = []Recipe{
 		Description: "This is a simple description",
 		Created:     time.Now(),
 	},
+	{
+		ID:      2,
+		Creator: 1,
+		Name:    "Petits sablés",
+		Ingredients: []RecipeIngredient{
+			{
+				ID:     1,
+				Amount: 100,
+				Unit:   "g",
+			},
+			{
+				ID:     3,
+				Amount: 150,
+				Unit:   "g",
+			},
+			{
+				ID:     4,
+				Amount: 80,
+				Unit:   "ml",
+			},
+		},
+		Description: "This is a simple description",
+		Created:     time.Now(),
+	},
 }
 
 // GetAll() returns all existing recipes
-func (m *RecipeModel) GetAll() ([]Recipe, error) {
-	return m.Recipes, nil
+func (m *RecipeModel) GetAll(include, exclude map[int]struct{}) ([]Recipe, error) {
+	res := []Recipe{}
+
+	contains := func(arr []RecipeIngredient, id int) bool {
+		for _, ing := range arr {
+			if ing.ID == id {
+				return true
+			}
+		}
+		return false
+	}
+
+	for _, rep := range m.Recipes {
+		good := true
+		for id := range include {
+			if !contains(rep.Ingredients, id) {
+				good = false
+				break
+			}
+		}
+
+		if good {
+			for id := range exclude {
+				if contains(rep.Ingredients, id) {
+					good = false
+					break
+				}
+			}
+		}
+
+		if good {
+			res = append(res, rep)
+		}
+	}
+
+	return res, nil
 }
 
 // Insert() inserts new recipes
