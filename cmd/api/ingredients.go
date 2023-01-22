@@ -2,6 +2,9 @@ package main
 
 import (
 	"net/http"
+	"strings"
+
+	"ctuanle.ovh/welsh-academy/internal/validator"
 )
 
 // listIngredients list all existing ingredients
@@ -27,6 +30,18 @@ func (app *application) createIngredient(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		// bad request
 		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+	input.Name = strings.TrimSpace(input.Name)
+
+	// validate input
+	v := validator.New()
+	v.Check(len(input.Name) > 0, "name", "must not be empty")
+	v.Check(input.Creator > 0, "creator", "creator id must be a positive integer")
+	v.Check(len(input.Name) < 100, "name", "must be less than 100 characters")
+
+	if !v.Valid() {
+		app.failedValidatorResponse(w, r, v.Errors)
 		return
 	}
 

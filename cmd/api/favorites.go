@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"ctuanle.ovh/welsh-academy/internal/validator"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -44,6 +45,14 @@ func (app *application) flagFavoriteRecipe(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		// bad request
 		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// validate input
+	v := validator.New()
+	v.Check(input.RecipeId > 0, "recipe_id", "recipe_id must be a positive integer")
+	if !v.Valid() {
+		app.failedValidatorResponse(w, r, v.Errors)
 		return
 	}
 

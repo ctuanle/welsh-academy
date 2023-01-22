@@ -67,3 +67,7 @@ func (app *application) readBodyToJSON(w http.ResponseWriter, r *http.Request, d
 
 	return err
 }
+
+func (app *application) failedValidatorResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
+	app.errorResponse(w, r, http.StatusUnprocessableEntity, errors)
+}

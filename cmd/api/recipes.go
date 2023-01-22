@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"ctuanle.ovh/welsh-academy/internal/models"
+	"ctuanle.ovh/welsh-academy/internal/validator"
 )
 
 // listRecipes list all existing recipes
@@ -71,6 +72,26 @@ func (app *application) createRecipe(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// bad request
 		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+	input.Name = strings.TrimSpace(input.Name)
+	input.Description = strings.TrimSpace(input.Description)
+
+	// validate input
+	v := validator.New()
+	v.Check(len(input.Name) > 0, "name", "recipe name can not be empty")
+	v.Check(len(input.Name) < 100, "name", "recipe name can not longer than 100 characters")
+	v.Check(len(input.Description) > 0, "name", "recipe description can not be empty")
+	v.Check(len(input.Description) > 2000, "name", "recipe description can not longer than 2000 characters")
+	v.Check(input.Creator > 0, "creator", "creator id must be a positive integer")
+	for _, ing := range input.Ingredients {
+		v.Check(ing.ID > 0, "ingredients", "ingredient id must be a positive integer")
+		v.Check(ing.Amount > 0, "ingredients", "ingredient amount must be positive")
+		v.Check(len(ing.Unit) > 0, "ingredients", "ingredient unit can not be empty")
+	}
+
+	if !v.Valid() {
+		app.failedValidatorResponse(w, r, v.Errors)
 		return
 	}
 
