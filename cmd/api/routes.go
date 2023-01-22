@@ -30,7 +30,7 @@ func (app *application) routes() *httprouter.Router {
 	// favorite recipes routes
 	router.HandlerFunc(http.MethodGet, "/users/:uid/favorites", app.listFavorites)
 	router.HandlerFunc(http.MethodPost, "/users/:uid/favorites", app.flagFavoriteRecipe)
-	router.HandlerFunc(http.MethodDelete, "/users/:uid/favorites/:rid", app.unflagFavoriteRecipe)
+	router.HandlerFunc(http.MethodDelete, "/users/:uid/favorites/:fid", app.unflagFavoriteRecipe)
 
 	return router
 }

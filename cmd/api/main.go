@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"ctuanle.ovh/welsh-academy/internal/models"
 )
 
 const version = "1.0.0"
@@ -15,8 +17,11 @@ type config struct {
 }
 
 type application struct {
-	config config
-	logger *log.Logger
+	config      config
+	logger      *log.Logger
+	ingredients *models.IngredientModel
+	recipes     *models.RecipeModel
+	favorites   *models.FavoriteModel
 }
 
 func main() {
@@ -28,8 +33,11 @@ func main() {
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
 	app := &application{
-		config: cfg,
-		logger: logger,
+		config:      cfg,
+		logger:      logger,
+		ingredients: &models.IngredientModel{Ingredients: models.Ingredients},
+		recipes:     &models.RecipeModel{Recipes: models.Recipes},
+		favorites:   &models.FavoriteModel{Favorites: models.Favorites},
 	}
 
 	srv := &http.Server{

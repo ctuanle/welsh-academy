@@ -3,37 +3,15 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
-	"time"
-
-	"ctuanle.ovh/welsh-academy/internal/data"
 )
-
-var ingredients = []data.Ingredient{
-	{
-		ID:        "farine",
-		Name:      "Farine",
-		CreatedAt: time.Now(),
-	},
-	{
-		ID:        "fromage",
-		Name:      "Fromage",
-		CreatedAt: time.Now(),
-	},
-	{
-		ID:        "piment",
-		Name:      "Piment",
-		CreatedAt: time.Now(),
-	},
-}
 
 // listIngredients list all existing ingredients
 // both expert and user can access this
 func (app *application) listIngredients(w http.ResponseWriter, r *http.Request) {
+	ingredients, _ := app.ingredients.GetAll()
 	err := app.writeJson(w, r, http.StatusOK, envelope{"ingredients": ingredients}, nil)
 	if err != nil {
-		app.logger.Print(err)
-		http.Error(w, "Server Error", http.StatusInternalServerError)
+		app.serverErrorResponse(w, r, err)
 	}
 }
 
@@ -41,7 +19,8 @@ func (app *application) listIngredients(w http.ResponseWriter, r *http.Request) 
 // only expert can access this
 func (app *application) createIngredient(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name string `json:"name"`
+		Name    string `json:"name"`
+		Creator int    `json:"creator"`
 	}
 
 	// decode body content into input
@@ -52,14 +31,11 @@ func (app *application) createIngredient(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	newIngredient := data.Ingredient{
-		ID:   strings.ToLower(input.Name),
-		Name: input.Name,
-	}
+	// insert new ingredient
+	newIngredientId, _ := app.ingredients.Insert(input.Name, input.Creator)
 
-	ingredients = append(ingredients, newIngredient)
-
-	err = app.writeJson(w, r, http.StatusCreated, nil, nil)
+	// response newly created ingredient to client
+	err = app.writeJson(w, r, http.StatusCreated, envelope{"newIngredient": newIngredientId}, nil)
 	if err != nil {
 		app.logger.Print(err)
 		app.serverErrorResponse(w, r, err)

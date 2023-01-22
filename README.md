@@ -74,3 +74,112 @@ A **user** should be able to enjoy the recipes by using the API to:
         </tr>
     </tbody>
 </table>
+
+## Entity/Model Design
+
+### User
+
+User is supposed to be managed by another api, but here I would like to have a simple structure of an user
+
+<table>
+    <tbody>
+        <tr>
+            <td><b>Field</b></td>
+            <td>ID</td>
+            <td>Username</td>
+            <td>Role</td>
+        </tr>
+        <tr>
+            <td><b>Type</b></td>
+            <td>Integer</td>
+            <td>String</td>
+            <td>Expert/User</td>
+        </tr>
+    </tbody>
+</table>
+
+### Ingredient
+
+<table>
+    <tbody>
+        <tr>
+            <td><b>Field</b></td>
+            <td>ID</td>
+            <td>Name</td>
+            <td>Creator(id)</td>
+            <td>Created</td>
+        </tr>
+        <tr>
+            <td><b>Type</b></td>
+            <td>Integer</td>
+            <td>String</td>
+            <td>Integer</td>
+            <td>Time</td>
+        </tr>
+    </tbody>
+</table>
+
+### Recipe
+
+**SubType(RecipeIngredient)**
+
+<table>
+    <tbody>
+        <tr>
+            <td><b>Field</b></td>
+            <td>ID(IngredientID)</td>
+            <td>Amount</td>
+            <td>Unit</td>
+        </tr>
+        <tr>
+            <td><b>Type</b></td>
+            <td>Integer</td>
+            <td>Float</td>
+            <td>String (ml/g/l/kg/...)</td>
+        </tr>
+    </tbody>
+</table>
+
+**Recipe**
+
+<table>
+    <tbody>
+        <tr>
+            <td><b>Field</b></td>
+            <td>ID</td>
+            <td>Creator(ID)</td>
+            <td>Name</td>
+            <td>Ingredients</td>
+            <td>Description</td>
+            <td>Created</td>
+        </tr>
+        <tr>
+            <td><b>Type</b></td>
+            <td>Integer</td>
+            <td>Integer</td>
+            <td>String</td>
+            <td>[]RecipeIngredient</td>
+            <td>String</td>
+            <td>Created</td>
+        </tr>
+    </tbody>
+</table>
+
+### Favorite Recipe
+
+<table>
+    <tbody>
+        <tr>
+            <td><b>Field</b></td>
+            <td>ID</td>
+            <td>UserId</td>
+            <td>RecipeId</td>
+        </tr>
+        <tr>
+            <td><b>Type</b></td>
+            <td>Integer</td>
+            <td>Integer</td>
+            <td>Integer</td>
+        </tr>
+    </tbody>
+</table>

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -19,7 +19,11 @@ func (app *application) listFavorites(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "list favorite recipes of user %d\n", uid)
+	favorites, _ := app.favorites.GetAll(int(uid))
+	err = app.writeJson(w, r, http.StatusOK, envelope{"favorites": favorites}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
 // flagFavoriteRecipe flags recipe as favorite
@@ -33,26 +37,38 @@ func (app *application) flagFavoriteRecipe(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	fmt.Fprintf(w, "flag recipe as favorite for user %d\n", uid)
+	var input struct {
+		RecipeId int `json:"recipe_id"`
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		// bad request
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	newFav, _ := app.favorites.Insert(int(uid), input.RecipeId)
+	err = app.writeJson(w, r, http.StatusCreated, envelope{"newFavorite": newFav}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
 // unflagFavoriteRecipe unflags a favorite recipe
 func (app *application) unflagFavoriteRecipe(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
 
-	// get user id
-	uid, err := strconv.ParseInt(params.ByName("uid"), 10, 64)
-	if err != nil {
-		app.notFoundResponse(w, r)
-		return
-	}
-
 	// get recipe id
-	rid, err := strconv.ParseInt(params.ByName("rid"), 10, 64)
+	fid, err := strconv.ParseInt(params.ByName("fid"), 10, 64)
 	if err != nil {
 		app.notFoundResponse(w, r)
 		return
 	}
 
-	fmt.Fprintf(w, "unflag recipe %d for user %d\n", rid, uid)
+	_ = app.favorites.Remove(int(fid))
+	err = app.writeJson(w, r, http.StatusOK, envelope{"message": "Deleted"}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
