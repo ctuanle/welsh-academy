@@ -1,9 +1,12 @@
 package main
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
 	"strconv"
 
+	"ctuanle.ovh/welsh-academy/internal/models"
 	"ctuanle.ovh/welsh-academy/internal/validator"
 	"github.com/julienschmidt/httprouter"
 )
@@ -13,13 +16,18 @@ func (app *application) listFavorites(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
 
 	// get user id
-	uid, err := strconv.ParseInt(params.ByName("uid"), 10, 64)
+	uid, err := strconv.Atoi(params.ByName("uid"))
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
 
-	favorites, _ := app.models.Favorites.GetAll(int(uid))
+	favorites, err := app.models.Favorites.GetAll(uid)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
 	err = app.writeJson(w, r, http.StatusOK, envelope{"favorites": favorites}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -31,7 +39,7 @@ func (app *application) flagFavoriteRecipe(w http.ResponseWriter, r *http.Reques
 	params := httprouter.ParamsFromContext(r.Context())
 
 	// get user id
-	uid, err := strconv.ParseInt(params.ByName("uid"), 10, 64)
+	uid, err := strconv.Atoi(params.ByName("uid"))
 	if err != nil {
 		app.notFoundResponse(w, r)
 		return
@@ -56,7 +64,13 @@ func (app *application) flagFavoriteRecipe(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	newFav, _ := app.models.Favorites.Insert(int(uid), input.RecipeId)
+	newFav := models.Favorite{UserId: uid, RecipeId: input.RecipeId}
+	err = app.models.Favorites.Insert(&newFav)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
 	err = app.writeJson(w, r, http.StatusCreated, envelope{"newFavorite": newFav}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -68,13 +82,24 @@ func (app *application) unflagFavoriteRecipe(w http.ResponseWriter, r *http.Requ
 	params := httprouter.ParamsFromContext(r.Context())
 
 	// get recipe id
-	fid, err := strconv.ParseInt(params.ByName("fid"), 10, 64)
+	fid, err := strconv.Atoi(params.ByName("fid"))
 	if err != nil {
 		app.notFoundResponse(w, r)
 		return
 	}
 
-	_ = app.models.Favorites.Remove(int(fid))
+	err = app.models.Favorites.Remove(fid)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			app.notFoundResponse(w, r)
+			return
+		default:
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+	}
+
 	err = app.writeJson(w, r, http.StatusOK, envelope{"message": "Deleted"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -50,8 +52,13 @@ func (app *application) listRecipes(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	recipes, _ := app.models.Recipes.GetAll(includeMap, excludeMap)
-	err := app.writeJson(w, r, http.StatusOK, envelope{"recipes": recipes}, nil)
+	recipes, err := app.models.Recipes.GetAll(includeMap, excludeMap)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJson(w, r, http.StatusOK, envelope{"recipes": recipes}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -60,11 +67,16 @@ func (app *application) listRecipes(w http.ResponseWriter, r *http.Request) {
 // createRecipe add an ingredient to db
 // only expert can access this
 func (app *application) createRecipe(w http.ResponseWriter, r *http.Request) {
+	type ingredientInput struct {
+		Amount float64 `json:"amount"`
+		Unit   string  `json:"unit"`
+	}
+
 	var input struct {
-		Name        string                    `json:"name"`
-		CreatorId   int                       `json:"creator_id"`
-		Description string                    `json:"description"`
-		Ingredients []models.RecipeIngredient `json:"ingredients"`
+		Name        string                  `json:"name"`
+		CreatorId   int                     `json:"creator_id"`
+		Description string                  `json:"description"`
+		Ingredients map[int]ingredientInput `json:"ingredients"`
 	}
 
 	// decode body content into input
@@ -82,12 +94,39 @@ func (app *application) createRecipe(w http.ResponseWriter, r *http.Request) {
 	v.Check(len(input.Name) > 0, "name", "recipe name can not be empty")
 	v.Check(len(input.Name) < 100, "name", "recipe name can not longer than 100 characters")
 	v.Check(len(input.Description) > 0, "name", "recipe description can not be empty")
-	v.Check(len(input.Description) > 2000, "name", "recipe description can not longer than 2000 characters")
+	v.Check(len(input.Description) < 2000, "name", "recipe description can not longer than 2000 characters")
 	v.Check(input.CreatorId > 0, "creator_id", "creator_id id must be a positive integer")
-	for _, ing := range input.Ingredients {
-		v.Check(ing.ID > 0, "ingredients", "ingredient id must be a positive integer")
-		v.Check(ing.Amount > 0, "ingredients", "ingredient amount must be positive")
-		v.Check(len(ing.Unit) > 0, "ingredients", "ingredient unit can not be empty")
+	v.Check(len(input.Ingredients) < 30, "ingredients", "there are way to much ingredients")
+
+	ingredients := map[int]models.RecipeIngredient{}
+
+	for id, info := range input.Ingredients {
+		should_break := false
+
+		v.Check(id > 0, "ingredients -> id", "ingredient id musts be a positive integer")
+
+		// check if ingredient exists
+		ing, err := app.models.Ingredients.GetById(id)
+		if err != nil {
+			switch {
+			case errors.Is(err, sql.ErrNoRows):
+				v.AddError("ingredients -> id", fmt.Sprintf("ingredient id %d does not exist", id))
+				should_break = true
+			default:
+				app.serverErrorResponse(w, r, err)
+				return
+			}
+		}
+
+		if should_break {
+			// break early
+			break
+		}
+
+		v.Check(info.Amount > 0, "ingredients", "ingredient amount must be positive")
+		v.Check(len(info.Unit) > 0, "ingredients", "ingredient unit can not be empty")
+
+		ingredients[id] = models.RecipeIngredient{Name: ing.Name, Amount: info.Amount, Unit: info.Unit}
 	}
 
 	if !v.Valid() {
@@ -96,7 +135,12 @@ func (app *application) createRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// insert new recipes
-	newRecipe, _ := app.models.Recipes.Insert(input.Name, input.Description, input.CreatorId, input.Ingredients)
+	newRecipe := models.Recipe{Name: input.Name, Description: input.Description, CreatorId: input.CreatorId, Ingredients: ingredients}
+	err = app.models.Recipes.Insert(&newRecipe)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 
 	// response newly created ingredient to client
 	err = app.writeJson(w, r, http.StatusCreated, envelope{"newRecipe": newRecipe}, nil)

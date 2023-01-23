@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS recipeingredient;
+-- DROP TABLE IF EXISTS recipeingredient;
 DROP TABLE IF EXISTS favorites;
 DROP TABLE IF EXISTS ingredients;
 DROP TABLE IF EXISTS recipes;

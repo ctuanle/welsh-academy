@@ -42,7 +42,7 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 // serverErrorResponse sends unexpected error that server encounters at runtime
 func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.logger.Print(err)
-	app.errorResponse(w, r, http.StatusInternalServerError, "Unexpected internal server error")
+	app.errorResponse(w, r, http.StatusInternalServerError, err.Error())
 }
 
 // notFoundResponse sends 404 NotFound in form json to client

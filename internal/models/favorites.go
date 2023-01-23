@@ -1,5 +1,9 @@
 package models
 
+import (
+	"database/sql"
+)
+
 type Favorite struct {
 	ID       int `json:"id"`
 	RecipeId int `json:"recipe_id"`
@@ -7,71 +11,71 @@ type Favorite struct {
 }
 
 type FavoriteModel struct {
-	Favorites []Favorite
-}
-
-var Favorites = []Favorite{
-	{
-		ID:       1,
-		RecipeId: 1,
-		UserId:   1,
-	},
-	{
-		ID:       2,
-		RecipeId: 1,
-		UserId:   2,
-	},
-	{
-		ID:       3,
-		RecipeId: 2,
-		UserId:   3,
-	},
+	DB *sql.DB
 }
 
 // GetAll() returns all favorite recipes of an user
-func (m *FavoriteModel) GetAll(user_id int) ([]Favorite, error) {
-	ans := []Favorite{}
+func (m *FavoriteModel) GetAll(user_id int) ([]*Favorite, error) {
+	query := `
+		SELECT id, recipe_id, user_id
+		FROM favorites
+		WHERE user_id = $1
+	`
 
-	for _, fav := range m.Favorites {
-		if fav.UserId == user_id {
-			ans = append(ans, fav)
+	rows, err := m.DB.Query(query, user_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	favorites := []*Favorite{}
+
+	for rows.Next() {
+		var fav Favorite
+		err := rows.Scan(&fav.ID, &fav.RecipeId, &fav.UserId)
+
+		if err != nil {
+			return nil, err
 		}
+
+		favorites = append(favorites, &fav)
 	}
 
-	return ans, nil
+	return favorites, nil
 }
 
 // Insert() flags recipe_id as user_id favorite
-func (m *FavoriteModel) Insert(user_id, recipe_id int) (Favorite, error) {
-	newFav := Favorite{
-		ID:       len(m.Favorites) + 1,
-		RecipeId: recipe_id,
-		UserId:   user_id,
-	}
+func (m *FavoriteModel) Insert(fav *Favorite) error {
+	query := `
+		INSERT INTO favorites (recipe_id, user_id)
+		VALUES ($1, $2)
+		RETURNING id
+	`
 
-	m.Favorites = append(m.Favorites, newFav)
-
-	return newFav, nil
+	return m.DB.QueryRow(query, fav.RecipeId, fav.UserId).Scan(&fav.ID)
 }
 
 // Remove() unflags recipe_id from user_id favorite
 func (m *FavoriteModel) Remove(favoriteId int) error {
-	index := -1
-
-	for i, fav := range m.Favorites {
-		if fav.ID == favoriteId {
-			index = i
-			break
-		}
+	if favoriteId < 1 {
+		return sql.ErrNoRows
 	}
 
-	if index < 0 {
-		return nil
+	query := "DELETE FROM favorites WHERE id = $1"
+
+	result, err := m.DB.Exec(query, favoriteId)
+	if err != nil {
+		return err
 	}
 
-	m.Favorites[index] = m.Favorites[len(m.Favorites)-1]
-	m.Favorites[len(m.Favorites)-1] = Favorite{}
-	m.Favorites = m.Favorites[:len(m.Favorites)-1]
+	rowsEffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsEffected == 0 {
+		return sql.ErrNoRows
+	}
 
 	return nil
 }

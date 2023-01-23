@@ -4,14 +4,21 @@ import (
 	"net/http"
 	"strings"
 
+	"ctuanle.ovh/welsh-academy/internal/models"
 	"ctuanle.ovh/welsh-academy/internal/validator"
 )
 
 // listIngredients list all existing ingredients
 // both expert and user can access this
 func (app *application) listIngredients(w http.ResponseWriter, r *http.Request) {
-	ingredients, _ := app.models.Ingredients.GetAll()
-	err := app.writeJson(w, r, http.StatusOK, envelope{"ingredients": ingredients}, nil)
+	ingredients, err := app.models.Ingredients.GetAll()
+
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJson(w, r, http.StatusOK, envelope{"ingredients": ingredients}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -45,11 +52,22 @@ func (app *application) createIngredient(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// insert new ingredient
-	newIngredientId, _ := app.models.Ingredients.Insert(input.Name, input.CreatorId)
+	newIng := models.Ingredient{
+		Name:      input.Name,
+		CreatorId: input.CreatorId,
+	}
+
+	err = app.models.Ingredients.Insert(&newIng)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	/* headers := http.Header{}
+	headers.Set("Location", fmt.Sprintf("/ingredients/%d", newIng.ID)) */
 
 	// response newly created ingredient to client
-	err = app.writeJson(w, r, http.StatusCreated, envelope{"newIngredient": newIngredientId}, nil)
+	err = app.writeJson(w, r, http.StatusCreated, envelope{"ingredient": newIng}, nil)
 	if err != nil {
 		app.logger.Print(err)
 		app.serverErrorResponse(w, r, err)

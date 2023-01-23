@@ -1,15 +1,17 @@
 package models
 
+import "database/sql"
+
 type Models struct {
 	Ingredients IngredientModel
 	Recipes     RecipeModel
 	Favorites   FavoriteModel
 }
 
-func New() Models {
+func New(db *sql.DB) Models {
 	return Models{
-		Ingredients: IngredientModel{Ingredients: Ingredients},
-		Recipes:     RecipeModel{Recipes: Recipes},
-		Favorites:   FavoriteModel{Favorites: Favorites},
+		Ingredients: IngredientModel{DB: db},
+		Recipes:     RecipeModel{DB: db},
+		Favorites:   FavoriteModel{DB: db},
 	}
 }
