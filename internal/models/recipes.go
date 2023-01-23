@@ -12,7 +12,7 @@ type RecipeIngredient struct {
 
 type Recipe struct {
 	ID          int                `json:"id"`
-	Creator     int                `json:"creator"`
+	CreatorId   int                `json:"creator_id"`
 	Name        string             `json:"name"`
 	Ingredients []RecipeIngredient `json:"ingredients"`
 	Description string             `json:"string"`
@@ -25,9 +25,9 @@ type RecipeModel struct {
 
 var Recipes = []Recipe{
 	{
-		ID:      1,
-		Creator: 1,
-		Name:    "Petits sablés",
+		ID:        1,
+		CreatorId: 1,
+		Name:      "Petits sablés",
 		Ingredients: []RecipeIngredient{
 			{
 				ID:     1,
@@ -49,9 +49,9 @@ var Recipes = []Recipe{
 		Created:     time.Now(),
 	},
 	{
-		ID:      2,
-		Creator: 1,
-		Name:    "Petits sablés",
+		ID:        2,
+		CreatorId: 1,
+		Name:      "Petits sablés",
 		Ingredients: []RecipeIngredient{
 			{
 				ID:     1,
@@ -115,12 +115,12 @@ func (m *RecipeModel) GetAll(include, exclude map[int]struct{}) ([]Recipe, error
 
 // Insert() inserts new recipes
 // and return this newly created recipe
-func (m *RecipeModel) Insert(name, description string, creator int, ingredients []RecipeIngredient) (Recipe, error) {
+func (m *RecipeModel) Insert(name, description string, creator_id int, ingredients []RecipeIngredient) (Recipe, error) {
 	newRecipe := Recipe{
 		ID:          len(m.Recipes) + 1,
 		Name:        name,
 		Description: description,
-		Creator:     creator,
+		CreatorId:   creator_id,
 		Created:     time.Now(),
 		Ingredients: ingredients,
 	}

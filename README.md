@@ -106,7 +106,7 @@ User is supposed to be managed by another api, but here I would like to have a s
             <td><b>Field</b></td>
             <td>ID</td>
             <td>Name</td>
-            <td>Creator(id)</td>
+            <td>CreatorId</td>
             <td>Created</td>
         </tr>
         <tr>
@@ -147,7 +147,7 @@ User is supposed to be managed by another api, but here I would like to have a s
         <tr>
             <td><b>Field</b></td>
             <td>ID</td>
-            <td>Creator(ID)</td>
+            <td>CreatorId</td>
             <td>Name</td>
             <td>Ingredients</td>
             <td>Description</td>

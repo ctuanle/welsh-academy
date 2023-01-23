@@ -19,7 +19,7 @@ func (app *application) listFavorites(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	favorites, _ := app.favorites.GetAll(int(uid))
+	favorites, _ := app.models.Favorites.GetAll(int(uid))
 	err = app.writeJson(w, r, http.StatusOK, envelope{"favorites": favorites}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -56,7 +56,7 @@ func (app *application) flagFavoriteRecipe(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	newFav, _ := app.favorites.Insert(int(uid), input.RecipeId)
+	newFav, _ := app.models.Favorites.Insert(int(uid), input.RecipeId)
 	err = app.writeJson(w, r, http.StatusCreated, envelope{"newFavorite": newFav}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -74,7 +74,7 @@ func (app *application) unflagFavoriteRecipe(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	_ = app.favorites.Remove(int(fid))
+	_ = app.models.Favorites.Remove(int(fid))
 	err = app.writeJson(w, r, http.StatusOK, envelope{"message": "Deleted"}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

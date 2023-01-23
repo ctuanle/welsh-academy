@@ -50,7 +50,7 @@ func (app *application) listRecipes(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	recipes, _ := app.recipes.GetAll(includeMap, excludeMap)
+	recipes, _ := app.models.Recipes.GetAll(includeMap, excludeMap)
 	err := app.writeJson(w, r, http.StatusOK, envelope{"recipes": recipes}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -62,7 +62,7 @@ func (app *application) listRecipes(w http.ResponseWriter, r *http.Request) {
 func (app *application) createRecipe(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name        string                    `json:"name"`
-		Creator     int                       `json:"creator"`
+		CreatorId   int                       `json:"creator_id"`
 		Description string                    `json:"description"`
 		Ingredients []models.RecipeIngredient `json:"ingredients"`
 	}
@@ -83,7 +83,7 @@ func (app *application) createRecipe(w http.ResponseWriter, r *http.Request) {
 	v.Check(len(input.Name) < 100, "name", "recipe name can not longer than 100 characters")
 	v.Check(len(input.Description) > 0, "name", "recipe description can not be empty")
 	v.Check(len(input.Description) > 2000, "name", "recipe description can not longer than 2000 characters")
-	v.Check(input.Creator > 0, "creator", "creator id must be a positive integer")
+	v.Check(input.CreatorId > 0, "creator_id", "creator_id id must be a positive integer")
 	for _, ing := range input.Ingredients {
 		v.Check(ing.ID > 0, "ingredients", "ingredient id must be a positive integer")
 		v.Check(ing.Amount > 0, "ingredients", "ingredient amount must be positive")
@@ -96,7 +96,7 @@ func (app *application) createRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// insert new recipes
-	newRecipe, _ := app.recipes.Insert(input.Name, input.Description, input.Creator, input.Ingredients)
+	newRecipe, _ := app.models.Recipes.Insert(input.Name, input.Description, input.CreatorId, input.Ingredients)
 
 	// response newly created ingredient to client
 	err = app.writeJson(w, r, http.StatusCreated, envelope{"newRecipe": newRecipe}, nil)

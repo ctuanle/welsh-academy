@@ -10,7 +10,7 @@ import (
 // listIngredients list all existing ingredients
 // both expert and user can access this
 func (app *application) listIngredients(w http.ResponseWriter, r *http.Request) {
-	ingredients, _ := app.ingredients.GetAll()
+	ingredients, _ := app.models.Ingredients.GetAll()
 	err := app.writeJson(w, r, http.StatusOK, envelope{"ingredients": ingredients}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -21,8 +21,8 @@ func (app *application) listIngredients(w http.ResponseWriter, r *http.Request) 
 // only expert can access this
 func (app *application) createIngredient(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name    string `json:"name"`
-		Creator int    `json:"creator"`
+		Name      string `json:"name"`
+		CreatorId int    `json:"creator_id"`
 	}
 
 	// decode body content into input
@@ -37,7 +37,7 @@ func (app *application) createIngredient(w http.ResponseWriter, r *http.Request)
 	// validate input
 	v := validator.New()
 	v.Check(len(input.Name) > 0, "name", "must not be empty")
-	v.Check(input.Creator > 0, "creator", "creator id must be a positive integer")
+	v.Check(input.CreatorId > 0, "creator_id", "creator_id id must be a positive integer")
 	v.Check(len(input.Name) < 100, "name", "must be less than 100 characters")
 
 	if !v.Valid() {
@@ -46,7 +46,7 @@ func (app *application) createIngredient(w http.ResponseWriter, r *http.Request)
 	}
 
 	// insert new ingredient
-	newIngredientId, _ := app.ingredients.Insert(input.Name, input.Creator)
+	newIngredientId, _ := app.models.Ingredients.Insert(input.Name, input.CreatorId)
 
 	// response newly created ingredient to client
 	err = app.writeJson(w, r, http.StatusCreated, envelope{"newIngredient": newIngredientId}, nil)
