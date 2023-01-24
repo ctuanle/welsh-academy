@@ -12,6 +12,8 @@ A **user** should be able to enjoy the recipes by using the API to:
 - flag/unflag recipes as his favorite ones
 - list his favorite recipes
 
+<img src="./assets/architect.jpg" alt="Architect">
+
 ## Table of contents
 
 - [Tables of endpoints](#table-of-endpoints)
