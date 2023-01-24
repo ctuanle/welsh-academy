@@ -14,16 +14,19 @@ A **user** should be able to enjoy the recipes by using the API to:
 
 ## Table of contents
 
-- [Tables of endpoints](./README.md#table-of-endpoints)
-- [Entity/Model design](./README.md#entitymodel-design)
-  - [User](./README.md#user)
-  - [Ingredient](./README.md#ingredient)
-  - [Recipe](./README.md#recipe)
-  - [Favorite Recipe](./README.md#favorite-recipe)
-- [Usage](./README.md#usage)
-  - [/ingredients](./README.md#ingredients)
-  - [/recipes](./README.md#recipes)
-  - [/users/:uid/favorites](./README.md#usersuidfavorites)
+- [Tables of endpoints](#table-of-endpoints)
+- [Entity/Model design](#entitymodel-design)
+  - [User](#user)
+  - [Ingredient](#ingredient)
+  - [Recipe](#recipe)
+  - [Favorite Recipe](#favorite-recipe)
+- [API Usage](#api-usage)
+  - [/ingredients](#ingredients)
+  - [/recipes](#recipes)
+  - [/users/:uid/favorites](#usersuidfavorites)
+- [Running](#running)
+  - [With docker](#with-docker)
+  - [Without docker](#without-docker)
 
 ## Table of endpoints
 
@@ -197,7 +200,7 @@ User is supposed to be managed by another api, but here I would like to have a s
     </tbody>
 </table>
 
-## Usage
+## API Usage
 
 ### **/ingredients**
 
@@ -261,7 +264,9 @@ with body
 
 **DELETE /users/1/favorites/1**
 
-## Docker Container
+## Running
+
+### **With docker**
 
 We need two environnement variables : POSTGRES_PASSWORD and POSTGRES_DNS.
 
@@ -281,4 +286,20 @@ docker compose build
 docker compose up
 ```
 
-For the moment, there might be an error that the app cannot connect to service postgresql, stop and run <code>docker compose up</code> will fix that.
+And that, api will be available on localhost:8000
+
+For the moment, there might be an error that the app cannot connect to service postgresql, stop and run <code>docker compose up</code> again will fix that.
+
+### **Without docker**
+
+First run migrations (only for the first time running app)
+
+```shell
+go run ./cmd/cli/migrate -dns=your_postgres_dns -up
+```
+
+Run the app
+
+```shell
+go run ./cmd/api -db-dns=your__postgres_dns -port=your_port
+```
