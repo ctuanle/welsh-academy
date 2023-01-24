@@ -7,7 +7,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (app *application) routes() *httprouter.Router {
+func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
 	// custom notfound and method-not-allowed handler
@@ -32,5 +32,5 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodPost, "/users/:uid/favorites", app.flagFavoriteRecipe)
 	router.HandlerFunc(http.MethodDelete, "/users/:uid/favorites/:fid", app.unflagFavoriteRecipe)
 
-	return router
+	return app.logRequest(app.enableCORS(router))
 }

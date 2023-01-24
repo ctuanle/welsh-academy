@@ -52,7 +52,6 @@ func (m *RecipeModel) GetAll(include, exclude map[int]struct{}) ([]*Recipe, erro
 		}
 		query = query[0 : len(query)-len("AND ")]
 	}
-	fmt.Println(query)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

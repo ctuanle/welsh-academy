@@ -17,7 +17,7 @@ import (
 type config struct {
 	port int
 	db   struct {
-		dsn string
+		dns string
 	}
 }
 
@@ -31,7 +31,7 @@ func main() {
 	var cfg config
 
 	flag.IntVar(&cfg.port, "port", 4000, "API Server Port")
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://welsh:azerty@localhost/welsh", "Postgres DNS")
+	flag.StringVar(&cfg.db.dns, "db-dns", "postgres://welsh:azerty@localhost/welsh", "Postgres DNS")
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
@@ -60,7 +60,7 @@ func main() {
 }
 
 func openDB(cfg config) (*sql.DB, error) {
-	db, err := sql.Open("postgres", cfg.db.dsn)
+	db, err := sql.Open("postgres", cfg.db.dns)
 	if err != nil {
 		return nil, err
 	}

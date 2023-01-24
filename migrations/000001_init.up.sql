@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE TYPE role as ENUM ('normal', 'expert');
 
 CREATE TABLE IF NOT EXISTS users (
@@ -86,3 +88,5 @@ CREATE TABLE IF NOT EXISTS favorites (
 
 INSERT INTO favorites (recipe_id, user_id) VALUES (1, 1);
 INSERT INTO favorites (recipe_id, user_id) VALUES (1, 1);
+
+COMMIT;

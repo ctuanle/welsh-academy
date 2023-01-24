@@ -12,6 +12,19 @@ A **user** should be able to enjoy the recipes by using the API to:
 - flag/unflag recipes as his favorite ones
 - list his favorite recipes
 
+## Table of contents
+
+- [Tables of endpoints](./README.md#table-of-endpoints)
+- [Entity/Model design](./README.md#entitymodel-design)
+  - [User](./README.md#user)
+  - [Ingredient](./README.md#ingredient)
+  - [Recipe](./README.md#recipe)
+  - [Favorite Recipe](./README.md#favorite-recipe)
+- [Usage](./README.md#usage)
+  - [/ingredients](./README.md#ingredients)
+  - [/recipes](./README.md#recipes)
+  - [/users/:uid/favorites](./README.md#usersuidfavorites)
+
 ## Table of endpoints
 
 <table>
@@ -44,7 +57,7 @@ A **user** should be able to enjoy the recipes by using the API to:
         </tr>
         <tr>
             <td>GET</td>
-            <td>/recipes</td>
+            <td>/recipes?include=1,2&exclude=3,4</td>
             <td>listRecipes</td>
             <td>List all existing recipes</td>
         </tr>
@@ -68,9 +81,9 @@ A **user** should be able to enjoy the recipes by using the API to:
         </tr>
         <tr>
             <td>DELETE</td>
-            <td>/users/:uid/favorites/:rid</td>
+            <td>/users/:uid/favorites/:fid</td>
             <td>unflagFavoriteRecipe</td>
-            <td>Unflag/Remove recipe (with id "rid") from user (with id "uid") favorite recipes list</td>
+            <td>Unflag/Remove favorite with id "fid"</td>
         </tr>
     </tbody>
 </table>
@@ -183,3 +196,67 @@ User is supposed to be managed by another api, but here I would like to have a s
         </tr>
     </tbody>
 </table>
+
+## Usage
+
+### **/ingredients**
+
+**GET /ingredients**
+
+**POST /ingredient**
+with body
+
+```json
+{
+  "name": "Tomato",
+  "creator_id": 3
+}
+```
+
+### **/recipes**
+
+**GET /recipes** </br>
+**GET /recipes?include=1** </br>
+**GET /recipes?include=1,2** </br>
+**GET /recipes?exclude=1,2** </br>
+**GET /recipes?include=1,3&exclude=2** </br>
+
+**POST /recipes** with body
+
+```json
+{
+  "name": "Name of recipe",
+  "description": "Some details, steps, bla... description",
+  "creator_id": 3,
+  "ingredients": {
+    "1": {
+      "amount": 0.5,
+      "unit": "bow"
+    },
+    "2": {
+      "amount": 1,
+      "unit": "spoon"
+    },
+    "3": {
+      "amount": 100,
+      "unit": "g"
+    }
+  }
+}
+```
+
+### **/users/:uid/favorites**
+
+**GET /users/1/favorites** </br>
+**GET /users/2/favorites** </br>
+
+**POST /users/1/favorites** </br>
+with body
+
+```json
+{
+  "recipe_id": 1
+}
+```
+
+**DELETE /users/1/favorites/1**
