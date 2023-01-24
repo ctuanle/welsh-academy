@@ -280,3 +280,5 @@ export POSTGRES_DNS=postgres://postgres:password@postgresql/welsh?sslmode=disabl
 docker compose build
 docker compose up
 ```
+
+For the moment, there might be an error that the app cannot connect to service postgresql, stop and run <code>docker compose up</code> will fix that.
