@@ -260,3 +260,23 @@ with body
 ```
 
 **DELETE /users/1/favorites/1**
+
+## Docker Container
+
+We need two environnement variables : POSTGRES_PASSWORD and POSTGRES_DNS.
+
+- POSTGRES_PASSWORD to set password for default postgres user
+- POSTGRES_DNS for app to connect
+
+For example:
+
+- POSTGRES_PASSWORD=password
+- POSTGRES_DNS=postgres://postgres:password@postgresql/welsh?sslmode=disable
+
+```shell
+cd ./path/to/root/of/project
+export POSTGRES_PASSWORD=password
+export POSTGRES_DNS=postgres://postgres:password@postgresql/welsh?sslmode=disable
+docker compose build
+docker compose up
+```
