@@ -82,7 +82,7 @@ func (m FavoriteModel) Remove(favoriteId int) error {
 	return nil
 }
 
-var mockedFavorites = []*Favorite{
+var MockedFavorites = []*Favorite{
 	{
 		ID:       1,
 		RecipeId: 1,
@@ -103,7 +103,7 @@ var mockedFavorites = []*Favorite{
 func (m MockFavoriteModel) GetAll(user_id int) ([]*Favorite, error) {
 	res := []*Favorite{}
 
-	for _, f := range mockedFavorites {
+	for _, f := range MockedFavorites {
 		if f != nil && f.UserId == user_id {
 			res = append(res, f)
 		}
@@ -113,15 +113,15 @@ func (m MockFavoriteModel) GetAll(user_id int) ([]*Favorite, error) {
 }
 
 func (m MockFavoriteModel) Insert(fav *Favorite) error {
-	fav.ID = len(mockedFavorites) + 1
+	fav.ID = len(MockedFavorites) + 1
 	return nil
 }
 
 func (m MockFavoriteModel) Remove(favoriteId int) error {
-	if favoriteId < 1 || favoriteId > len(mockedFavorites) || mockedFavorites[favoriteId] == nil {
+	if favoriteId < 1 || favoriteId > len(MockedFavorites) || MockedFavorites[favoriteId] == nil {
 		return sql.ErrNoRows
 	}
 
-	mockedFavorites[favoriteId] = nil
+	MockedFavorites[favoriteId] = nil
 	return nil
 }

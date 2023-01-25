@@ -18,7 +18,7 @@ func (app *application) listFavorites(w http.ResponseWriter, r *http.Request) {
 	// get user id
 	uid, err := strconv.Atoi(params.ByName("uid"))
 	if err != nil {
-		http.NotFound(w, r)
+		app.notFoundResponse(w, r)
 		return
 	}
 

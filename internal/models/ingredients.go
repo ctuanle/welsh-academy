@@ -91,47 +91,47 @@ func (m IngredientModel) Insert(ingredient *Ingredient) error {
 	return m.DB.QueryRow(query, ingredient.Name, ingredient.CreatorId).Scan(&ingredient.ID, &ingredient.Created)
 }
 
-var mockedIngredients = []*Ingredient{
+var MockedIngredients = []*Ingredient{
 	{
 		ID:        1,
 		Name:      "Farine",
 		CreatorId: 1,
-		Created:   time.Now(),
+		Created:   time.Date(2023, 1, 24, 0, 0, 0, 0, time.UTC),
 	},
 	{
 		ID:        2,
 		Name:      "Fromage",
 		CreatorId: 2,
-		Created:   time.Now(),
+		Created:   time.Date(2023, 2, 24, 0, 0, 0, 0, time.UTC),
 	},
 	{
 		ID:        3,
 		Name:      "Piment",
 		CreatorId: 3,
-		Created:   time.Now(),
+		Created:   time.Date(2023, 3, 24, 0, 0, 0, 0, time.UTC),
 	},
 }
 
 // GetAll() returns an array of mocked ingredients
 func (m MockIngredientModel) GetAll() ([]*Ingredient, error) {
-	return mockedIngredients, nil
+	return MockedIngredients, nil
 }
 
 // GetById() return a mocked ingredient
 func (m MockIngredientModel) GetById(id int) (*Ingredient, error) {
-	if id < 1 || id > len(mockedIngredients) || mockedIngredients[id-1] == nil {
+	if id < 1 || id > len(MockedIngredients) || MockedIngredients[id-1] == nil {
 		return nil, sql.ErrNoRows
 	}
 
-	return mockedIngredients[id-1], nil
+	return MockedIngredients[id-1], nil
 }
 
 // Insert() mocking an action of inserting an ingredient to db
 func (m MockIngredientModel) Insert(ingredient *Ingredient) error {
-	ingredient.ID = len(mockedIngredients)
+	ingredient.ID = len(MockedIngredients) + 1
 	ingredient.Created = time.Now()
 
-	mockedIngredients = append(mockedIngredients, ingredient)
+	MockedIngredients = append(MockedIngredients, ingredient)
 
 	return nil
 }

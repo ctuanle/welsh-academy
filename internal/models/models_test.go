@@ -11,7 +11,7 @@ func TestIngredientGetAll(t *testing.T) {
 	model := NewMockModels().Ingredients
 	ingredients, _ := model.GetAll()
 
-	td.Cmp(t, ingredients, mockedIngredients)
+	td.Cmp(t, ingredients, MockedIngredients)
 }
 
 func TestIngredientGetById(t *testing.T) {
@@ -28,20 +28,20 @@ func TestIngredientGetById(t *testing.T) {
 	td.Cmp(t, err, sql.ErrNoRows)
 
 	// get with id out of range
-	ing, err = model.GetById(len(mockedIngredients) + 1)
+	ing, err = model.GetById(len(MockedIngredients) + 1)
 	td.Cmp(t, ing, td.Nil())
 	td.Cmp(t, err, sql.ErrNoRows)
 
 	// get with valid id
 	ing, err = model.GetById(1)
 	td.Cmp(t, err, td.Nil())
-	td.Cmp(t, ing, mockedIngredients[0])
+	td.Cmp(t, ing, MockedIngredients[0])
 }
 
 func TestIngredientInsert(t *testing.T) {
 	model := NewMockModels().Ingredients
 
-	expectedNewId := len(mockedIngredients)
+	expectedNewId := len(MockedIngredients) + 1
 	newIng := Ingredient{
 		Name:      "Am New",
 		CreatorId: 1,
@@ -57,7 +57,7 @@ func TestRecipeGetAll(t *testing.T) {
 
 	// without ingredient constraint
 	recipes, _ := model.GetAll(nil, nil)
-	td.Cmp(t, recipes, mockedRecipes)
+	td.Cmp(t, recipes, MockedRecipes)
 
 	// with ingredient constraint
 	include := map[int]struct{}{1: {}}
@@ -65,11 +65,11 @@ func TestRecipeGetAll(t *testing.T) {
 
 	recipes, _ = model.GetAll(include, nil)
 	td.Cmp(t, len(recipes), 1)
-	td.Cmp(t, recipes[0], mockedRecipes[0])
+	td.Cmp(t, recipes[0], MockedRecipes[0])
 
 	recipes, _ = model.GetAll(nil, exclude)
 	td.Cmp(t, len(recipes), 1)
-	td.Cmp(t, recipes[0], mockedRecipes[1])
+	td.Cmp(t, recipes[0], MockedRecipes[1])
 
 	recipes, _ = model.GetAll(include, exclude)
 	td.Cmp(t, len(recipes), 0)
@@ -90,7 +90,7 @@ func TestRecipeInsert(t *testing.T) {
 		},
 	}
 
-	expectedNewId := len(mockedRecipes) + 1
+	expectedNewId := len(MockedRecipes) + 1
 
 	_ = model.Insert(&newRec)
 
@@ -121,7 +121,7 @@ func TestFavoriteInsert(t *testing.T) {
 		RecipeId: 1,
 	}
 
-	expectedNewId := len(mockedFavorites) + 1
+	expectedNewId := len(MockedFavorites) + 1
 
 	model.Insert(&newFav)
 

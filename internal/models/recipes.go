@@ -107,7 +107,7 @@ func (m RecipeModel) Insert(recipe *Recipe) error {
 	return m.DB.QueryRow(query, recipe.Name, recipe.CreatorId, recipe.Description, str).Scan(&recipe.ID, &recipe.Created)
 }
 
-var mockedRecipes = []*Recipe{
+var MockedRecipes = []*Recipe{
 	{
 		ID:        1,
 		CreatorId: 1,
@@ -130,7 +130,7 @@ var mockedRecipes = []*Recipe{
 			},
 		},
 		Description: "This is a simple description",
-		Created:     time.Now(),
+		Created:     time.Date(2023, 1, 24, 0, 0, 0, 0, time.UTC),
 	},
 	{
 		ID:        2,
@@ -154,14 +154,14 @@ var mockedRecipes = []*Recipe{
 			},
 		},
 		Description: "This is a simple description",
-		Created:     time.Now(),
+		Created:     time.Date(2023, 1, 24, 0, 0, 0, 0, time.UTC),
 	},
 }
 
 func (m MockRecipeModel) GetAll(include, exclude map[int]struct{}) ([]*Recipe, error) {
 	ans := []*Recipe{}
 
-	for _, rec := range mockedRecipes {
+	for _, rec := range MockedRecipes {
 		good := true
 
 		for in := range include {
@@ -191,9 +191,9 @@ func (m MockRecipeModel) GetAll(include, exclude map[int]struct{}) ([]*Recipe, e
 }
 
 func (m MockRecipeModel) Insert(recipe *Recipe) error {
-	recipe.ID = len(mockedRecipes) + 1
+	recipe.ID = len(MockedRecipes) + 1
 	recipe.Created = time.Now()
-	mockedRecipes = append(mockedRecipes, recipe)
+	MockedRecipes = append(MockedRecipes, recipe)
 
 	return nil
 }

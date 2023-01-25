@@ -1,22 +1,20 @@
 # Welsh Academy
 
-[Version Française](./assets)
+**Welsh Academy** est une application destinée à fournir des recettes aux amateurs de cheddar du monde entier. Il s'agit d'un backend permettant aux **experts** du cheddar de:
 
-**Welsh Academy** is an application dedicated to provide recipes to cheddar lovers around the world. This a backend allowing cheddar **experts** to:
+- Créer des ingrédients
+- Créer des recettes de repas en utilisant les ingrédients créés précédemment
 
-- Create ingredients
-- Create recipes of meals using the previously created ingredients
+Un **utilisateur** devrait pouvoir profiter des recettes en utilisant l'API pour :
 
-A **user** should be able to enjoy the recipes by using the API to:
+- lister tous les ingrédients existants
+- lister toutes les recettes possibles (avec ou sans contrainte d'ingrédient)
+- marquer/désigner ses recettes préférées
+- lister ses recettes préférées
 
-- list all existing ingredients
-- list all possible recipes (with or without ingredient constraints)
-- flag/unflag recipes as his favorite ones
-- list his favorite recipes
+<img src="./architect.jpg" alt="Architect">
 
-<img src="./assets/architect.jpg" alt="Architect">
-
-## Table of contents
+## Table des matières
 
 - [Tables of endpoints](#table-of-endpoints)
 - [Entity/Model design](#entitymodel-design)
@@ -49,49 +47,49 @@ A **user** should be able to enjoy the recipes by using the API to:
             <td>GET</td>
             <td>/</td>
             <td></td>
-            <td>Display a welcome message</td>
+            <td>Afficher un message de bienvenue</td>
         </tr>
         <tr>
             <td>GET</td>
             <td>/ingredients</td>
             <td>listIngredients</td>
-            <td>List all existing ingredients</td>
+            <td>Liste de tous les ingrédients existants</td>
         </tr>
         <tr>
             <td>POST</td>
             <td>/ingredients</td>
             <td>createIngredient</td>
-            <td>Create a new ingredient (expert only)</td>
+            <td>Créer un nouvel ingrédient (expert uniquement)</td>
         </tr>
         <tr>
             <td>GET</td>
             <td>/recipes?include=1,2&exclude=3,4</td>
             <td>listRecipes</td>
-            <td>List all existing recipes</td>
+            <td>Lister toutes les recettes existantes</td>
         </tr>
         <tr>
             <td>POST</td>
             <td>/recipes</td>
             <td>createRecipe</td>
-            <td>Create a new recipe (expert only)</td>
+            <td>Créer une nouvelle recette (expert uniquement)</td>
         </tr>
         <tr>
             <td>GET</td>
             <td>/users/:uid/favorites</td>
             <td>listFavorites</td>
-            <td>List all favorite recipes of an user with id "uid"</td>
+            <td>Liste de toutes les recettes préférées d'un utilisateur avec l'id "uid".</td>
         </tr>
         <tr>
             <td>POST</td>
             <td>/users/:uid/favorites</td>
             <td>flagFavoriteRecipe</td>
-            <td>Flag/Add a recipe as user favorite one</td>
+            <td>Marquer/Ajouter une recette comme favorite de l'utilisateur</td>
         </tr>
         <tr>
             <td>DELETE</td>
             <td>/users/:uid/favorites/:fid</td>
             <td>unflagFavoriteRecipe</td>
-            <td>Unflag/Remove favorite with id "fid"</td>
+            <td>Déclarer/supprimer un favori avec l'identifiant "fid".</td>
         </tr>
     </tbody>
 </table>
@@ -100,7 +98,7 @@ A **user** should be able to enjoy the recipes by using the API to:
 
 ### User
 
-User is supposed to be managed by another api, but here I would like to have a simple structure of an user
+L'utilisateur est censé être géré par une autre api, mais ici je voudrais avoir une structure simple d'un utilisateur
 
 <table>
     <tbody>
@@ -273,12 +271,12 @@ with body
 
 ### **With docker**
 
-We need two environnement variables : POSTGRES_PASSWORD and POSTGRES_DNS.
+Nous avons besoin de deux variables d'environnement : POSTGRES_PASSWORD et POSTGRES_DNS.
 
-- POSTGRES_PASSWORD to set password for default postgres user
-- POSTGRES_DNS for app to connect
+- POSTGRES_PASSWORD pour définir le mot de passe de l'utilisateur postgres par défaut.
+- POSTGRES_DNS pour que l'application puisse se connecter.
 
-For example:
+Par exemple :
 
 - POSTGRES_PASSWORD=password
 - POSTGRES_DNS=postgres://postgres:password@postgresql/welsh?sslmode=disable
@@ -291,19 +289,19 @@ docker compose build
 docker compose up
 ```
 
-And that, api will be available on localhost:8000
+L'api sera disponible sur localhost:8000
 
-For the moment, there might be an error that the app cannot connect to service postgresql, stop and run <code>docker compose up</code> again will fix that.
+Pour le moment, il pourrait y avoir une erreur que l'application ne peut pas se connecter au service postgresql, arrêter et exécuter <code>docker compose up</code> à nouveau corrigera cela.
 
 ### **Without docker**
 
-First run migrations (only for the first time running app)
+Premières migrations (uniquement pour la première exécution de l'application)
 
 ```shell
 go run ./cmd/cli/migrate -dns=your_postgres_dns -up
 ```
 
-Run the app
+Lancer l'application
 
 ```shell
 go run ./cmd/api -db-dns=your__postgres_dns -port=your_port
@@ -311,13 +309,13 @@ go run ./cmd/api -db-dns=your__postgres_dns -port=your_port
 
 ## Testing
 
-Test API handlers
+Test des gestionnaires d'API
 
 ```shell
 CGO_ENABLED=0 go test ./cmd/api
 ```
 
-Testing DB models (mock)
+Test des modèles de BD (mock)
 
 ```shell
 go test ./internal/models/

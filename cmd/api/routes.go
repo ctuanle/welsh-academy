@@ -28,9 +28,12 @@ func (app *application) routes() http.Handler {
 	router.POST("/recipes", toHandle(app.createRecipe))
 
 	// favorite recipes routes
-	router.GET("/users/:uid/favorites", toHandle(app.listFavorites))
-	router.POST("/users/:uid/favorites", toHandle(app.flagFavoriteRecipe))
-	router.DELETE("/users/:uid/favorites/:fid", toHandle(app.unflagFavoriteRecipe))
+	// router.GET("/users/:uid/favorites", toHandle(app.listFavorites))
+	// router.POST("/users/:uid/favorites", toHandle(app.flagFavoriteRecipe))
+	// router.DELETE("/users/:uid/favorites/:fid", toHandle(app.unflagFavoriteRecipe))
+	router.HandlerFunc(http.MethodGet, "/users/:uid/favorites", app.listFavorites)
+	router.HandlerFunc(http.MethodPost, "/users/:uid/favorites", app.flagFavoriteRecipe)
+	router.HandlerFunc(http.MethodDelete, "/users/:uid/favorites/:fid", app.unflagFavoriteRecipe)
 
 	return app.logRequest(enableCORS(router))
 }
