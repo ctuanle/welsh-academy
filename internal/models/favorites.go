@@ -14,8 +14,10 @@ type FavoriteModel struct {
 	DB *sql.DB
 }
 
+type MockFavoriteModel struct{}
+
 // GetAll() returns all favorite recipes of an user
-func (m *FavoriteModel) GetAll(user_id int) ([]*Favorite, error) {
+func (m FavoriteModel) GetAll(user_id int) ([]*Favorite, error) {
 	query := `
 		SELECT id, recipe_id, user_id
 		FROM favorites
@@ -45,7 +47,7 @@ func (m *FavoriteModel) GetAll(user_id int) ([]*Favorite, error) {
 }
 
 // Insert() flags recipe_id as user_id favorite
-func (m *FavoriteModel) Insert(fav *Favorite) error {
+func (m FavoriteModel) Insert(fav *Favorite) error {
 	query := `
 		INSERT INTO favorites (recipe_id, user_id)
 		VALUES ($1, $2)
@@ -56,7 +58,7 @@ func (m *FavoriteModel) Insert(fav *Favorite) error {
 }
 
 // Remove() unflags recipe_id from user_id favorite
-func (m *FavoriteModel) Remove(favoriteId int) error {
+func (m FavoriteModel) Remove(favoriteId int) error {
 	if favoriteId < 1 {
 		return sql.ErrNoRows
 	}
@@ -77,5 +79,49 @@ func (m *FavoriteModel) Remove(favoriteId int) error {
 		return sql.ErrNoRows
 	}
 
+	return nil
+}
+
+var mockedFavorites = []*Favorite{
+	{
+		ID:       1,
+		RecipeId: 1,
+		UserId:   1,
+	},
+	{
+		ID:       2,
+		RecipeId: 1,
+		UserId:   2,
+	},
+	{
+		ID:       3,
+		RecipeId: 2,
+		UserId:   3,
+	},
+}
+
+func (m MockFavoriteModel) GetAll(user_id int) ([]*Favorite, error) {
+	res := []*Favorite{}
+
+	for _, f := range mockedFavorites {
+		if f != nil && f.UserId == user_id {
+			res = append(res, f)
+		}
+	}
+
+	return res, nil
+}
+
+func (m MockFavoriteModel) Insert(fav *Favorite) error {
+	fav.ID = len(mockedFavorites) + 1
+	return nil
+}
+
+func (m MockFavoriteModel) Remove(favoriteId int) error {
+	if favoriteId < 1 || favoriteId > len(mockedFavorites) || mockedFavorites[favoriteId] == nil {
+		return sql.ErrNoRows
+	}
+
+	mockedFavorites[favoriteId] = nil
 	return nil
 }

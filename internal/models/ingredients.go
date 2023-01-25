@@ -17,6 +17,9 @@ type IngredientModel struct {
 	DB *sql.DB
 }
 
+// for testing purpose
+type MockIngredientModel struct{}
+
 // GetAll() returns all existing ingredients
 func (m IngredientModel) GetAll() ([]*Ingredient, error) {
 	query := "SELECT id, name, creator_id, created FROM ingredients"
@@ -86,4 +89,49 @@ func (m IngredientModel) Insert(ingredient *Ingredient) error {
 	`
 
 	return m.DB.QueryRow(query, ingredient.Name, ingredient.CreatorId).Scan(&ingredient.ID, &ingredient.Created)
+}
+
+var mockedIngredients = []*Ingredient{
+	{
+		ID:        1,
+		Name:      "Farine",
+		CreatorId: 1,
+		Created:   time.Now(),
+	},
+	{
+		ID:        2,
+		Name:      "Fromage",
+		CreatorId: 2,
+		Created:   time.Now(),
+	},
+	{
+		ID:        3,
+		Name:      "Piment",
+		CreatorId: 3,
+		Created:   time.Now(),
+	},
+}
+
+// GetAll() returns an array of mocked ingredients
+func (m MockIngredientModel) GetAll() ([]*Ingredient, error) {
+	return mockedIngredients, nil
+}
+
+// GetById() return a mocked ingredient
+func (m MockIngredientModel) GetById(id int) (*Ingredient, error) {
+	if id < 1 || id > len(mockedIngredients) || mockedIngredients[id-1] == nil {
+		return nil, sql.ErrNoRows
+	}
+
+	return mockedIngredients[id-1], nil
+}
+
+// Insert() mocking an action of inserting an ingredient to db
+func (m MockIngredientModel) Insert(ingredient *Ingredient) error {
+	ingredient.ID = len(mockedIngredients)
+	ingredient.Created = time.Now()
+
+	mockedIngredients = append(mockedIngredients, ingredient)
+
+	return nil
 }
