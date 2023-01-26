@@ -273,27 +273,37 @@ with body
 
 ### **With docker**
 
-We need two environnement variables : POSTGRES_PASSWORD and POSTGRES_DNS.
+We need three environnement variables : POSTGRES_PASSWORD,POSTGRES_DB and PORT.
 
-- POSTGRES_PASSWORD to set password for default postgres user
-- POSTGRES_DNS for app to connect
+- POSTGRES_PASSWORD to set password for default postgres user, be default "azerty"
+- POSTGRES_DB for the database name, by default "welsh"
+- PORT on which the api is exposed, by default 8000
 
 For example:
 
-- POSTGRES_PASSWORD=password
-- POSTGRES_DNS=postgres://postgres:password@postgresql/welsh?sslmode=disable
+- POSTGRES_PASSWORD=i-cannot-be-broken
+- POSTGRES_DNS=welsh-academy
+- PORT=5000
+
+First go to the root project directory
 
 ```shell
 cd ./path/to/root/of/project
-export POSTGRES_PASSWORD=password
-export POSTGRES_DNS=postgres://postgres:password@postgresql/welsh?sslmode=disable
-docker compose build
-docker compose up
 ```
 
-And that, api will be available on localhost:8000
+With default password and db name:
 
-For the moment, there might be an error that the app cannot connect to service postgresql, stop and run <code>docker compose up</code> again will fix that.
+```shell
+docker compose -f ./docker/docker-compose.yml up
+```
+
+With custom password, db name and port:
+
+```shell
+POSTGRES_PASSWORD=your-password POSTGRES_DB=you-db-name PORT=your-port-number docker compose -f ./docker/docker-compose.yml up
+```
+
+And that, api will be available on localhost:8000 (or your port)
 
 ### **Without docker**
 

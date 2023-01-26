@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  app:
+    build:
+      context: ./..
+      dockerfile: docker/Dockerfile
+    ports:
+      - '${PORT:-8000}:4000'
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-azerty}
+      POSTGRES_DB: ${POSTGRES_DB:-welsh}
+    depends_on:
+      postgresql:
+        condition: service_healthy
+  postgresql:
+    image: postgres:14.6
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-azerty}
+      POSTGRES_DB: ${POSTGRES_DB:-welsh}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5

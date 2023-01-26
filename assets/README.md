@@ -271,27 +271,37 @@ with body
 
 ### **With docker**
 
-Nous avons besoin de deux variables d'environnement : POSTGRES_PASSWORD et POSTGRES_DNS.
+Nous avons besoin de trois variables d'environnement : POSTGRES_PASSWORD et POSTGRES_DNS.
 
-- POSTGRES_PASSWORD pour définir le mot de passe de l'utilisateur postgres par défaut.
-- POSTGRES_DNS pour que l'application puisse se connecter.
+- POSTGRES_PASSWORD pour définir le mot de passe de l'utilisateur postgres par défaut (azerty par défaut).
+- POSTGRES_DB pour le nom de la base de données à créer (welsh par défault).
+- PORT sur lequel l'api est exposée, par défaut 8000
 
 Par exemple :
 
-- POSTGRES_PASSWORD=password
-- POSTGRES_DNS=postgres://postgres:password@postgresql/welsh?sslmode=disable
+- POSTGRES_PASSWORD=i-cannot-be-broken
+- POSTGRES_DNS=welsh-academy
+- PORT=5000
+
+Allez d'abord dans le répertoire racine du projet
 
 ```shell
 cd ./path/to/root/of/project
-export POSTGRES_PASSWORD=password
-export POSTGRES_DNS=postgres://postgres:password@postgresql/welsh?sslmode=disable
-docker compose build
-docker compose up
 ```
 
-L'api sera disponible sur localhost:8000
+Avec le mot de passe et le nom de la base de données par défaut :
 
-Pour le moment, il pourrait y avoir une erreur que l'application ne peut pas se connecter au service postgresql, arrêter et exécuter <code>docker compose up</code> à nouveau corrigera cela.
+```shell
+docker compose -f ./docker/docker-compose.yml up
+```
+
+Avec un mot de passe, un nom de base de données et un port personnalisés :
+
+```shell
+POSTGRES_PASSWORD=your-password POSTGRES_DB=you-db-name PORT=your-port-number docker compose -f ./docker/docker-compose.yml up
+```
+
+L'api sera disponible sur localhost:8000 (ou votre porte)
 
 ### **Without docker**
 
