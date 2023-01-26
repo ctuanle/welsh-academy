@@ -1,9 +1,10 @@
-package models
+package mocks
 
 import (
 	"database/sql"
 	"testing"
 
+	"ctuanle.ovh/welsh-academy/internal/models"
 	"github.com/maxatome/go-testdeep/td"
 )
 
@@ -42,7 +43,7 @@ func TestIngredientInsert(t *testing.T) {
 	model := NewMockModels().Ingredients
 
 	expectedNewId := len(MockedIngredients) + 1
-	newIng := Ingredient{
+	newIng := models.Ingredient{
 		Name:      "Am New",
 		CreatorId: 1,
 	}
@@ -78,11 +79,11 @@ func TestRecipeGetAll(t *testing.T) {
 func TestRecipeInsert(t *testing.T) {
 	model := NewMockModels().Recipes
 
-	newRec := Recipe{
+	newRec := models.Recipe{
 		Name:        "Test",
 		CreatorId:   1,
 		Description: "Test",
-		Ingredients: map[int]RecipeIngredient{
+		Ingredients: map[int]models.RecipeIngredient{
 			1: {
 				Amount: 1,
 				Unit:   "kg",
@@ -101,7 +102,7 @@ func TestFavoriteGetAll(t *testing.T) {
 	model := NewMockModels().Favorites
 
 	favorites, _ := model.GetAll(1)
-	td.Cmp(t, favorites, []*Favorite{
+	td.Cmp(t, favorites, []*models.Favorite{
 		{
 			ID:       1,
 			RecipeId: 1,
@@ -116,7 +117,7 @@ func TestFavoriteGetAll(t *testing.T) {
 func TestFavoriteInsert(t *testing.T) {
 	model := NewMockModels().Favorites
 
-	newFav := Favorite{
+	newFav := models.Favorite{
 		UserId:   4,
 		RecipeId: 1,
 	}

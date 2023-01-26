@@ -1,6 +1,8 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type Models struct {
 	Ingredients interface {
@@ -25,14 +27,5 @@ func New(db *sql.DB) Models {
 		Ingredients: IngredientModel{DB: db},
 		Recipes:     RecipeModel{DB: db},
 		Favorites:   FavoriteModel{DB: db},
-	}
-}
-
-// NewMockModels() return mock models for testing
-func NewMockModels() Models {
-	return Models{
-		Ingredients: MockIngredientModel{},
-		Recipes:     MockRecipeModel{},
-		Favorites:   MockFavoriteModel{},
 	}
 }

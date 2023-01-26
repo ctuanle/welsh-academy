@@ -6,6 +6,7 @@ import (
 
 	"ctuanle.ovh/welsh-academy/internal/models"
 	"ctuanle.ovh/welsh-academy/internal/validator"
+	"github.com/lib/pq"
 )
 
 // listIngredients list all existing ingredients
@@ -59,6 +60,12 @@ func (app *application) createIngredient(w http.ResponseWriter, r *http.Request)
 
 	err = app.models.Ingredients.Insert(&newIng)
 	if err != nil {
+		if err, ok := err.(*pq.Error); ok {
+			if err.Code.Name() == "foreign_key_violation" {
+				app.errorResponse(w, r, http.StatusBadRequest, "creator id does not exist")
+				return
+			}
+		}
 		app.serverErrorResponse(w, r, err)
 		return
 	}

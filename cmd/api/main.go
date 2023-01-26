@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"ctuanle.ovh/welsh-academy/internal/mocks"
 	"ctuanle.ovh/welsh-academy/internal/models"
 	_ "github.com/lib/pq"
 )
@@ -46,7 +47,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
-		models: models.New(db),
+		models: mocks.NewMockModels(),
 	}
 
 	srv := &http.Server{

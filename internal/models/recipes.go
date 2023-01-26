@@ -27,8 +27,6 @@ type RecipeModel struct {
 	DB *sql.DB
 }
 
-type MockRecipeModel struct{}
-
 // GetAll() returns all existing recipes
 func (m RecipeModel) GetAll(include, exclude map[int]struct{}) ([]*Recipe, error) {
 	query := `
@@ -105,95 +103,4 @@ func (m RecipeModel) Insert(recipe *Recipe) error {
 	`
 
 	return m.DB.QueryRow(query, recipe.Name, recipe.CreatorId, recipe.Description, str).Scan(&recipe.ID, &recipe.Created)
-}
-
-var MockedRecipes = []*Recipe{
-	{
-		ID:        1,
-		CreatorId: 1,
-		Name:      "Petits sablés",
-		Ingredients: map[int]RecipeIngredient{
-			1: {
-				Name:   "Fromage",
-				Amount: 100,
-				Unit:   "g",
-			},
-			2: {
-				Name:   "Piment",
-				Amount: 50,
-				Unit:   "g",
-			},
-			3: {
-				Name:   "Crème",
-				Amount: 100,
-				Unit:   "g",
-			},
-		},
-		Description: "This is a simple description",
-		Created:     time.Date(2023, 1, 24, 0, 0, 0, 0, time.UTC),
-	},
-	{
-		ID:        2,
-		CreatorId: 2,
-		Name:      "Name 2",
-		Ingredients: map[int]RecipeIngredient{
-			3: {
-				Name:   "Fromage",
-				Amount: 100,
-				Unit:   "g",
-			},
-			4: {
-				Name:   "Piment",
-				Amount: 50,
-				Unit:   "g",
-			},
-			5: {
-				Name:   "Crème",
-				Amount: 100,
-				Unit:   "g",
-			},
-		},
-		Description: "This is a simple description",
-		Created:     time.Date(2023, 1, 24, 0, 0, 0, 0, time.UTC),
-	},
-}
-
-func (m MockRecipeModel) GetAll(include, exclude map[int]struct{}) ([]*Recipe, error) {
-	ans := []*Recipe{}
-
-	for _, rec := range MockedRecipes {
-		good := true
-
-		for in := range include {
-			if _, ok := rec.Ingredients[in]; !ok {
-				good = false
-				break
-			}
-		}
-
-		if !good {
-			continue
-		}
-
-		for ex := range exclude {
-			if _, ok := rec.Ingredients[ex]; ok {
-				good = false
-				break
-			}
-		}
-
-		if good {
-			ans = append(ans, rec)
-		}
-	}
-
-	return ans, nil
-}
-
-func (m MockRecipeModel) Insert(recipe *Recipe) error {
-	recipe.ID = len(MockedRecipes) + 1
-	recipe.Created = time.Now()
-	MockedRecipes = append(MockedRecipes, recipe)
-
-	return nil
 }

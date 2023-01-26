@@ -93,9 +93,10 @@ func (app *application) createRecipe(w http.ResponseWriter, r *http.Request) {
 	v := validator.New()
 	v.Check(len(input.Name) > 0, "name", "recipe name can not be empty")
 	v.Check(len(input.Name) < 100, "name", "recipe name can not longer than 100 characters")
-	v.Check(len(input.Description) > 0, "name", "recipe description can not be empty")
-	v.Check(len(input.Description) < 2000, "name", "recipe description can not longer than 2000 characters")
+	v.Check(len(input.Description) > 0, "description", "recipe description can not be empty")
+	v.Check(len(input.Description) < 2000, "description", "recipe description can not longer than 2000 characters")
 	v.Check(input.CreatorId > 0, "creator_id", "creator_id id must be a positive integer")
+	v.Check(len(input.Ingredients) > 0, "ingredients", "there must be at least one ingredient")
 	v.Check(len(input.Ingredients) < 30, "ingredients", "there are way to much ingredients")
 
 	ingredients := map[int]models.RecipeIngredient{}
