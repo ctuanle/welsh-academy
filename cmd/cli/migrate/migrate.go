@@ -64,5 +64,5 @@ func main() {
 	default:
 		fmt.Println("Nothing to do. Run this command with --help to see possible actions")
 	}
-
+	fmt.Println("Done without error.")
 }

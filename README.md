@@ -332,3 +332,11 @@ Testing DB models (mock)
 ```shell
 go test ./internal/models/
 ```
+
+Testing with postgres (test db) inside containers
+
+```shell
+docker compose -f ./docker/docker-compose.test.yml up --build
+```
+
+And then test results should appear in logger.

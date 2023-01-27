@@ -1,0 +1,13 @@
+# syntax=docker/dockerfile:1
+
+FROM golang:1.19
+WORKDIR /welsh/
+COPY . .
+RUN go mod tidy
+RUN CGO_ENABLED=0
+RUN echo 'go run ./cmd/cli/migrate -dns=postgres://postgres:password@postgresql/welsh?sslmode=disable -up' >> startup.sh
+RUN echo 'PG_TEST_DNS=postgres://postgres:password@postgresql/welsh?sslmode=disable go test -cover ./...' >> startup.sh
+RUN chmod u+x startup.sh
+RUN echo 'go run ./cmd/cli/migrate -dns=postgres://postgres:password@postgresql/welsh?sslmode=disable -down' >> startup.sh
+
+CMD ["/bin/sh", "./startup.sh"]

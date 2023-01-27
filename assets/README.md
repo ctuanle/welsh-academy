@@ -330,3 +330,11 @@ Test des modèles de BD (mock)
 ```shell
 go test ./internal/models/
 ```
+
+Test avec une test-base-de-données postgres dans containers
+
+```shell
+docker compose -f ./docker/docker-compose.test.yml up --build
+```
+
+Et les résultats du test devraient apparaître dans le journal.

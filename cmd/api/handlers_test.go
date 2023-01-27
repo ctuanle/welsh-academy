@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -15,11 +17,27 @@ import (
 
 // newTestApplication() returns a new application
 // for testing purpose, with mock models
-func newTestApplication() *application {
-	return &application{
+func newTestApplication(t *testing.T) *application {
+	dns := os.Getenv("PG_TEST_DNS")
+	cfg := config{}
+	cfg.db.dns = dns
+
+	app := &application{
 		logger: log.New(io.Discard, "", 0),
-		models: mocks.NewMockModels(),
+		config: cfg,
 	}
+
+	if dns == "" {
+		app.models = mocks.NewMockModels()
+	} else {
+		db, err := openDB(cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		app.models = models.New(db)
+	}
+
+	return app
 }
 
 // newTestServer() returns a server for testing purpose
@@ -35,20 +53,27 @@ func newTestAPI(t *testing.T, app *application) *tdhttp.TestAPI {
 }
 
 func TestListIngredientsHandler(t *testing.T) {
-	app := newTestApplication()
+	app := newTestApplication(t)
 	testAPI := newTestAPI(t, app)
-	expectedIngredients, _ := app.models.Ingredients.GetAll()
+	expectedIngredients, err := app.models.Ingredients.GetAll()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	expectedJson, err := json.Marshal(map[string][]*models.Ingredient{
+		"ingredients": expectedIngredients,
+	})
+	if err != nil {
+		t.Errorf(err.Error())
+	}
 
 	testAPI.Get("/ingredients").
 		Name("List all ingredients").
 		CmpStatus(http.StatusOK).
-		CmpJSONBody(map[string][]*models.Ingredient{
-			"ingredients": expectedIngredients,
-		})
+		CmpJSONBody(td.JSON(expectedJson))
 }
 
 func TestCreateIngredientHandler(t *testing.T) {
-	testAPI := newTestAPI(t, newTestApplication())
+	testAPI := newTestAPI(t, newTestApplication(t))
 
 	var body struct {
 		Name      string `json:"name"`
@@ -58,16 +83,16 @@ func TestCreateIngredientHandler(t *testing.T) {
 	// Test with valid input request body
 	body.Name = "Test Name"
 	body.CreatorId = 1
-	expectedNewID := len(mocks.MockedIngredients) + 1
+
 	testAPI.PostJSON("/ingredients", body).
 		Name("Create Ingredient: (valid input)").
 		CmpStatus(http.StatusCreated).
 		CmpJSONBody(map[string]*models.Ingredient{
 			"ingredient": {
-				ID:        expectedNewID,
+				ID:        testAPI.Anchor(td.Gt(0)).(int),
 				Name:      "Test Name",
 				CreatorId: 1,
-				Created:   testAPI.Anchor(td.Between(testAPI.SentAt(), time.Now())).(time.Time),
+				Created:   testAPI.Anchor(td.Between(testAPI.SentAt().Add(-time.Second), time.Now().Add(time.Second))).(time.Time),
 			},
 		})
 
@@ -97,41 +122,69 @@ func TestCreateIngredientHandler(t *testing.T) {
 }
 
 func TestListRecipesHandler(t *testing.T) {
-	app := newTestApplication()
+	app := newTestApplication(t)
 	testAPI := newTestAPI(t, app)
 	model := app.models.Recipes
 
-	expectedRecipes, _ := model.GetAll(nil, nil)
+	expectedRecipes, err := model.GetAll(nil, nil)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	expectedJson, err := json.Marshal(map[string][]*models.Recipe{
+		"recipes": expectedRecipes,
+	})
+	if err != nil {
+		t.Errorf(err.Error())
+	}
 	testAPI.Get("/recipes").
 		Name("List all recipes").
 		CmpStatus(http.StatusOK).
-		CmpJSONBody(map[string][]*models.Recipe{
-			"recipes": expectedRecipes,
-		})
+		CmpJSONBody(td.JSON(expectedJson))
 
-	expectedRecipes, _ = model.GetAll(map[int]struct{}{1: {}}, nil)
+	expectedRecipes, err = model.GetAll(map[int]struct{}{1: {}}, nil)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	expectedJson, err = json.Marshal(map[string][]*models.Recipe{
+		"recipes": expectedRecipes,
+	})
+	if err != nil {
+		t.Errorf(err.Error())
+	}
 	testAPI.Get("/recipes?include=1").
 		Name("List recipes including ingredient 1").
 		CmpStatus(http.StatusOK).
-		CmpJSONBody(map[string][]*models.Recipe{
-			"recipes": expectedRecipes,
-		})
+		CmpJSONBody(td.JSON(expectedJson))
 
-	expectedRecipes, _ = model.GetAll(nil, map[int]struct{}{1: {}})
+	expectedRecipes, err = model.GetAll(nil, map[int]struct{}{1: {}})
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	expectedJson, err = json.Marshal(map[string][]*models.Recipe{
+		"recipes": expectedRecipes,
+	})
+	if err != nil {
+		t.Errorf(err.Error())
+	}
 	testAPI.Get("/recipes?exclude=1").
 		Name("List recipes excluding ingredient 1").
 		CmpStatus(http.StatusOK).
-		CmpJSONBody(map[string][]*models.Recipe{
-			"recipes": expectedRecipes,
-		})
+		CmpJSONBody(td.JSON(expectedJson))
 
-	expectedRecipes, _ = model.GetAll(map[int]struct{}{1: {}}, map[int]struct{}{2: {}})
+	expectedRecipes, err = model.GetAll(map[int]struct{}{1: {}}, map[int]struct{}{2: {}})
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	expectedJson, err = json.Marshal(map[string][]*models.Recipe{
+		"recipes": expectedRecipes,
+	})
+	if err != nil {
+		t.Errorf(err.Error())
+	}
 	testAPI.Get("/recipes?include=1&exclude=2").
 		Name("List recipes including ingredient 1 and excluding 2").
 		CmpStatus(http.StatusOK).
-		CmpJSONBody(map[string][]*models.Recipe{
-			"recipes": expectedRecipes,
-		})
+		CmpJSONBody(td.JSON(expectedJson))
 
 	testAPI.Get("/recipes?include=a").
 		Name("List recipes including invalid ingredient id").
@@ -153,7 +206,7 @@ func TestListRecipesHandler(t *testing.T) {
 }
 
 func TestCreateRecipe(t *testing.T) {
-	app := newTestApplication()
+	app := newTestApplication(t)
 	testAPI := newTestAPI(t, app)
 
 	type ingredientInput struct {
@@ -192,7 +245,7 @@ func TestCreateRecipe(t *testing.T) {
 						Unit:   body.Ingredients[1].Unit,
 					},
 				},
-				Created: testAPI.Anchor(td.Between(testAPI.SentAt(), time.Now())).(time.Time),
+				Created: testAPI.Anchor(td.Between(testAPI.SentAt().Add(-time.Second), time.Now().Add(time.Second))).(time.Time),
 			},
 		})
 
@@ -233,7 +286,7 @@ func TestCreateRecipe(t *testing.T) {
 }
 
 func TestListFavoritesHandler(t *testing.T) {
-	app := newTestApplication()
+	app := newTestApplication(t)
 	testAPI := newTestAPI(t, app)
 	model := app.models.Favorites
 
@@ -268,7 +321,7 @@ func TestListFavoritesHandler(t *testing.T) {
 }
 
 func TestFlagFavoriteRecipeHandler(t *testing.T) {
-	testAPI := newTestAPI(t, newTestApplication())
+	testAPI := newTestAPI(t, newTestApplication(t))
 
 	body := map[string]int{"recipe_id": 1}
 
@@ -295,7 +348,7 @@ func TestFlagFavoriteRecipeHandler(t *testing.T) {
 }
 
 func TestUnFlagFavoriteHandler(t *testing.T) {
-	testAPI := newTestAPI(t, newTestApplication())
+	testAPI := newTestAPI(t, newTestApplication(t))
 
 	testAPI.Delete("/users/2/favorites/2", nil).
 		Name("Delete favorite item 2 from user 2 list of favorite recipes").
