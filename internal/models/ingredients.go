@@ -88,5 +88,8 @@ func (m IngredientModel) Insert(ingredient *Ingredient) error {
 		RETURNING id, created
 	`
 
-	return m.DB.QueryRow(query, ingredient.Name, ingredient.CreatorId).Scan(&ingredient.ID, &ingredient.Created)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return m.DB.QueryRowContext(ctx, query, ingredient.Name, ingredient.CreatorId).Scan(&ingredient.ID, &ingredient.Created)
 }

@@ -1,7 +1,9 @@
 package models
 
 import (
+	"context"
 	"database/sql"
+	"time"
 )
 
 type Favorite struct {
@@ -22,7 +24,10 @@ func (m FavoriteModel) GetAll(user_id int) ([]*Favorite, error) {
 		WHERE user_id = $1
 	`
 
-	rows, err := m.DB.Query(query, user_id)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +57,10 @@ func (m FavoriteModel) Insert(fav *Favorite) error {
 		RETURNING id
 	`
 
-	return m.DB.QueryRow(query, fav.RecipeId, fav.UserId).Scan(&fav.ID)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return m.DB.QueryRowContext(ctx, query, fav.RecipeId, fav.UserId).Scan(&fav.ID)
 }
 
 // Remove() unflags recipe_id from user_id favorite
@@ -62,8 +70,10 @@ func (m FavoriteModel) Remove(favoriteId int) error {
 	}
 
 	query := "DELETE FROM favorites WHERE id = $1"
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
-	result, err := m.DB.Exec(query, favoriteId)
+	result, err := m.DB.ExecContext(ctx, query, favoriteId)
 	if err != nil {
 		return err
 	}
